@@ -33,12 +33,6 @@ This is a fork of the original project by @lartsch. Original repository: [lartsc
 
 ## Installation
 
-# [<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/chrome/chrome.svg" width="48" alt="Chrome" />](https://chrome.google.com/webstore/detail/fediact/lmpcajpkjcclkjbliapfjfolocffednm) [![Chrome Webstore](https://img.shields.io/chrome-web-store/v/lmpcajpkjcclkjbliapfjfolocffednm.svg?label=%20)](https://chrome.google.com/webstore/detail/fediact/lmpcajpkjcclkjbliapfjfolocffednm)  
-All up-to-date Chromium browsers, including Kiwi and Yandex browsers on Android
-
-# [<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/firefox/firefox.svg" width="48" alt="Firefox" />](https://addons.mozilla.org/en-US/firefox/addon/fediact/) [![Mozilla Addon Store](https://img.shields.io/amo/v/fediact.svg?label=%20%20)](https://addons.mozilla.org/en-US/firefox/addon/fediact/)  
-Up-to-date Firefox (v107+), including Firefox Nightly on Android
-
 This fork has not been pushed to the Firefox or Chrome store yet.
 
 Please use the [manual installation method](#manual-installation).
