@@ -1,6 +1,6 @@
 {
   "name": "fedi-act",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Chrome/Firefox extension that simplifies interactions on other Mastodon instances than your own.",
   "scripts": {
     "pack": "node pack.js"
