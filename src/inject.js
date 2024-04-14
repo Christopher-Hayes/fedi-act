@@ -68,6 +68,27 @@ function log(text) {
 	}
 }
 
+// Find the icon element of a button element
+function findIcon(el) {
+  let icon = $(el).find("i").first();
+  if (!icon.length) {
+    icon = $(el).find("svg").first();
+  }
+
+  return icon;
+}
+
+// Use accessibility labels to determine which buttons get clicked
+function isReplyButton(el) {
+	return $(el).attr("aria-label") === "Reply";
+}
+function isBoostButton(el) {
+	return $(el).attr("aria-label") === "Boost";
+}
+function isFavouriteButton(el) {
+	return $(el).attr("aria-label") === "Favorite";
+}
+
 // Custom solution for detecting inserted nodes
 // Works in combination with nodeinserted.css (fixes Firefox blocking addon-inserted <style> elements for sites with CSP)
 // Is more reliable/practicable in certain situations than mutationobserver, who will ignore any node that was inserted with its parent node at once
@@ -664,7 +685,7 @@ async function processReply() {
 	// wait for the detailed status action bar to appear
 	$(document).DOMNodeAppear(function (e) {
 		// find the reply button and click it
-		$(e.target).find("button:has(i.fa-reply), button:has(i.fa-reply-all)").click()
+		$(e.target).find("button:has(.icon-reply, .fa-reply), button:has(i.fa-reply-all)").click()
 	}, "div.detailed-status__action-bar")
 }
 
@@ -673,11 +694,15 @@ async function processToots() {
 	// determine action when a button is clicked (except reply, which will always redirect)
 	function getTootAction(e) {
 		// set to false initially
-		var action = false
-		// check if the clicked element has a retweet icon
-		if ($(e.currentTarget).children("i.fa-retweet").length) {
+		let action = false
+	
+		const button = e.currentTarget
+		const icon = findIcon(button)
+
+		// Check if boost button
+		if (icon.hasClass("fa-retweet") || icon.hasClass("icon-retweet")) {
 			// if so, check if the retweet icon has the fediactive class (for all other buttons it will be the button element itself)
-			if ($(e.currentTarget).children("i.fa-retweet").hasClass("fediactive")) {
+			if (icon.hasClass("fediactive")) {
 				// yep, has the class - so this action should be unboost
 				action = "unboost"
 			} else {
@@ -685,38 +710,39 @@ async function processToots() {
 				action = "boost"
 			}
 			// repeat for favourite and bookmark
-		} else if ($(e.currentTarget).children("i.fa-star").length) {
-			if ($(e.currentTarget).hasClass("fediactive")) {
+		} else if (icon.hasClass("fa-star") || icon.hasClass("icon-star")) {
+			if ($(button).hasClass("fediactive")) {
 				action = "unfavourite"
 			} else {
 				action = "favourite"
 			}
-		} else if ($(e.currentTarget).children("i.fa-bookmark").length) {
-			if ($(e.currentTarget).hasClass("fediactive")) {
+		} else if (icon.hasClass("fa-bookmark") || icon.hasClass("icon-bookmark")) {
+			if ($(button).hasClass("fediactive")) {
 				action = "unbookmark"
 			} else {
 				action = "bookmark"
 			}
 			// should rarely reach this point, but some v3 instances include the action in the href only, so we have this as a fallback
 			// (v3 public view does NOT have a bookmark button)
-		} else if ($(e.currentTarget).attr("href")) {
+		} else if ($(button).attr("href")) {
 			// does the href include "type=reblog"?
-			if (~$(e.currentTarget).attr("href").indexOf("type=reblog")) {
+			if (~$(button).attr("href").indexOf("type=reblog")) {
 				// if so, do as above...
-				if ($(e.currentTarget).hasClass("fediactive")) {
+				if ($(button).hasClass("fediactive")) {
 					action = "unboost"
 				} else {
 					action = "boost"
 				}
 				// repeat for favourite
-			} else if (~$(e.currentTarget).attr("href").indexOf("type=favourite")) {
-				if ($(e.currentTarget).hasClass("fediactive")) {
+			} else if (~$(button).attr("href").indexOf("type=favourite")) {
+				if ($(button).hasClass("fediactive")) {
 					action = "unfavourite"
 				} else {
 					action = "favourite"
 				}
 			}
 		}
+
 		return action
 	}
 	// some toots contain an href which can be an already resolved external link or an internal reference
@@ -764,8 +790,8 @@ async function processToots() {
 			// otherwise do the same for any closest article or div with the data-id attribute
 		} else if ($(el).closest("article[data-id], div[data-id]").length) {
 			return $(el).closest("article[data-id], div[data-id]").first().attr("data-id").split("-").slice(-1)[0]
-		} else if ($(el).find("a.icon-button:has(i.fa-star), a.detailed-status__link:has(i.fa-star)").length) {
-			var hrefEl = $(el).find("a.icon-button:has(i.fa-star), a.detailed-status__link:has(i.fa-star)").first()
+		} else if ($(el).find("a.icon-button:has(.fa-star, .icon-star), a.detailed-status__link:has(.fa-star, .icon-star)").length) {
+			var hrefEl = $(el).find("a.icon-button:has(.fa-star, .icon-star), a.detailed-status__link:has(.fa-star, .icon-star)").first()
 			if ($(hrefEl).attr("href")) {
 				var hrefAttr = $(hrefEl).attr("href")
 				if (~hrefAttr.indexOf("interact/")) {
@@ -855,21 +881,21 @@ async function processToots() {
 			// check if id is already cached
 			var cacheIndex = isInProcessedToots(internalIdentifier)
 			// get all button elements of this toot
-			var favButton = $(el).find("button:has(i.fa-star)").first()
+			var favButton = $(el).find("button.star-icon").first()
 			if (!$(favButton).length) {
-				favButton = $(el).find("a.icon-button:has(i.fa-star), a.detailed-status__link:has(i.fa-star)")
+				favButton = $(el).find("a.icon-button:has(.fa-star, .icon-star), a.detailed-status__link:has(.fa-star, .icon-star)")
 			}
 			if (isDetailed) {
 				$("<div class='detailed-status__button fediactprocessingdetailed'><span class='fediactprocessing'></span></div>").insertAfter($(favButton).parent())
 			} else {
 				$("<span class='fediactprocessing'></span>").insertAfter($(favButton))
 			}
-			var boostButton = $(el).find("button:has(i.fa-retweet)").first()
+			var boostButton = $(el).find("button:has(.icon-retweet, .fa-retweet)").first()
 			if (!$(boostButton).length) {
 				boostButton = $(el).find("a.icon-button:has(i.fa-retweet), a.detailed-status__link:has(i.fa-retweet)")
 			}
-			var bookmarkButton = $(el).find("button:has(i.fa-bookmark)").first()
-			var replyButton = $(el).find("button:has(i.fa-reply), button:has(i.fa-reply-all), a.icon-button:has(i.fa-reply), a.icon-button:has(i.fa-reply-all)").first()
+			var bookmarkButton = $(el).find("button:has(.icon-bookmark, .fa-bookmark)").first()
+			var replyButton = $(el).find("button:has(.icon-reply, .fa-reply), button:has(i.fa-reply-all), a.icon-button:has(i.fa-reply), a.icon-button:has(i.fa-reply-all)").first()
 			var spoilerButton = $(el).find('button[class*="show-more"]').first()
 			var voteButton = $(el).find("div.poll button").first()
 			if ($(spoilerButton).length) {
@@ -925,7 +951,7 @@ async function processToots() {
 							if (action == "boost" || action == "unboost") {
 								// toggle inline css styles
 								toggleInlineCss($(e.currentTarget), [["color", "!remove", "rgb(140, 141, 255)"]], "fediactive")
-								toggleInlineCss($(e.currentTarget).find("i"), [["transition-duration", "!remove", "0.9s"], ["background-position", "!remove", "0px 100%"]], "fediactive")
+								toggleInlineCss(findIcon(e.currentTarget), [["animation", "spring-rotate-out 1s linear", "spring-rotate-in 1s linear"]], "fediactive")
 								// update element in cache if exists
 								if (cacheIndex) {
 									tmpSettings.processed[cacheIndex][3] = !tmpSettings.processed[cacheIndex][3]
@@ -933,7 +959,7 @@ async function processToots() {
 								// same for favourite, bookmarked....
 							} else if (action == "favourite" || action == "unfavourite") {
 								toggleInlineCss($(e.currentTarget), [["color", "!remove", "rgb(202, 143, 4)"]], "fediactive")
-								toggleInlineCss($(e.currentTarget).find("i"), [["animation", "spring-rotate-out 1s linear", "spring-rotate-in 1s linear"]], "fediactive")
+								toggleInlineCss(findIcon(e.currentTarget), [["animation", "spring-rotate-out 1s linear", "spring-rotate-in 1s linear"]], "fediactive")
 								if (cacheIndex) {
 									tmpSettings.processed[cacheIndex][4] = !tmpSettings.processed[cacheIndex][4]
 								}
@@ -1003,14 +1029,14 @@ async function processToots() {
 					if (tootdata[4]) {
 						if (!$(favButton).hasClass("fediactive")) {
 							toggleInlineCss($(favButton), [["color", "!remove", "rgb(202, 143, 4)"]], "fediactive")
-							toggleInlineCss($(favButton).find("i"), [["animation", "spring-rotate-out 1s linear", "spring-rotate-in 1s linear"]], "fediactive")
+							toggleInlineCss(findIcon(favButton), [["animation", "spring-rotate-out 1s linear", "spring-rotate-in 1s linear"]], "fediactive")
 						}
 					}
 					// repeat for other buttons
 					if (tootdata[3]) {
 						if (!$(boostButton).find("i.fediactive").length) {
 							toggleInlineCss($(boostButton), [["color", "!remove", "rgb(140, 141, 255)"]], "fediactive")
-							toggleInlineCss($(boostButton).find("i"), [["transition-duration", "!remove", "0.9s"], ["background-position", "!remove", "0px 100%"]], "fediactive")
+							toggleInlineCss(findIcon(boostButton), [["transition-duration", "!remove", "0.9s"], ["background-position", "!remove", "0px 100%"]], "fediactive")
 						}
 					}
 					if (tootdata[5]) {
@@ -1309,7 +1335,8 @@ async function processProfile() {
 			fullHandle = $(el).closest("div.account-card").find("div.display-name > span").text().trim()
 		} else if ($(el).closest("div.directory__card").length) {
 			fullHandle = $(el).closest("div.directory__card").find("div.display-name > span").text().trim()
-			icon = $(el).find("i").first()
+
+			icon = findIcon(el)
 		} else {
 			// for all other pages, where only one of the selection elements is present
 			for (const selector of profileNamePaths) {
