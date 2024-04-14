@@ -27,3 +27,4 @@ secrets.json
 
 # Additional directories or files to ignore
 node_modules/
+**/*.min.*
