@@ -2,6 +2,8 @@
 
 A Chrome/Firefox extension that simplifies follow and post interactions on Mastodon servers other than your own.
 
+This is a fork of the original project by @lartsch. Original repository: [lartsch/FediAct](https://github.com/lartsch/FediAct)
+
 ## Features
 
 - Supports Mastodon v3 + v4 (some features v4 only)
@@ -37,7 +39,6 @@ Up-to-date Firefox (v107+), including Firefox Nightly on Android
 - If the webstore release is outdated, consider using the [manual installation method](#manual-installation) to install the latest version.
 - Special installation steps for [Firefox on Android](#install-in-firefox-for-android).
 - Chrome store updates may take 1-2 days longer.
-- If you like this addon, consider donating: [paypal.me/lartsch](https://paypal.me/lartsch)
 
 ## Setup
 
@@ -70,8 +71,9 @@ With the correct home server set, you'll be able to interact on other Mastodon s
 **Can I use this on iOS?**
 
 >Not reliably, but:
->- Orion Browser may support it soon (see issue [#16](https://github.com/Lartsch/FediAct/issues/16)).
->- There are plans for Safari support (see issue [#17](https://github.com/Lartsch/FediAct/issues/17)).
+>
+>- Orion Browser may support it soon (see issue [#16](https://github.com/Christopher-Hayes/fedi-act/issues/16)).
+>- There are plans for Safari support (see issue [#17](https://github.com/Christopher-Hayes/fedi-act/issues/17)).
 
 **Can you add feature XY?**
 
@@ -79,8 +81,8 @@ With the correct home server set, you'll be able to interact on other Mastodon s
 
 **Is this safe to use?**
 
->This project is open source. The code can be reviewed on GitHub or by extracting the addon from the stores. 
->Implementation efforts have been made to prevent server abuse. The addon does not require your username or password. Data is stored locally, with the API token being the only sensitive piece sent solely to your home server. 
+>This project is open source. The code can be reviewed on GitHub or by extracting the addon from the stores.
+>Implementation efforts have been made to prevent server abuse. The addon does not require your username or password. Data is stored locally, with the API token being the only sensitive piece sent solely to your home server.
 
 ## Screenshots / GIFs
 
@@ -89,20 +91,20 @@ v0.9.8
 <details>
   <summary>Extension Popup / Settings</summary>
   
-  ![Settings Screenshot](https://github.com/lartsch/FediAct/blob/main/img/settings.png?raw=true)
+  ![Settings Screenshot](https://github.com/Christopher-Hayes/fedi-act/blob/main/img/settings.png?raw=true)
   
 </details>
 
 <details>
   <summary>Showcase</summary>
   
-  ![Showcase GIF](https://github.com/lartsch/FediAct/blob/main/img/showcase.gif?raw=true)
+  ![Showcase GIF](https://github.com/Christopher-Hayes/fedi-act/blob/main/img/showcase.gif?raw=true)
   
 </details>
 
 ## Manual Installation
 
-1. Download the [latest GitHub release](https://github.com/Lartsch/FediAct/releases/latest) for Chrome or Firefox.
+1. Download the [latest GitHub release](https://github.com/Christopher-Hayes/fedi-act/releases/latest) for Chrome or Firefox.
 
 ### Chrome
 
@@ -163,12 +165,27 @@ The included collection features all default add-ons, so you won't miss any. You
 
 For planned features and todos, check the [GitHub project](https://github.com/users/Lartsch/projects/2). Items are sorted by importance.
 
+(TODOs link to the original repository by @lartsch)
+
 ## Contributing
 
-For bugs and feature suggestions, create [issues](https://github.com/Lartsch/FediAct/issues). Pull requests are welcome for improvements.
+### Local Development
 
-## Thanks to...
+#### Dev: Setup
+
+1. Clone the repository. `git clone https://github.com/Christopher-Hayes/fedi-act.git`
+
+#### Dev: Building
+
+1. Make sure you're at the root of the project.
+2. Run `./pack.sh <VERSION>`.
+
+### Bugs and Feature Suggestions
+
+For bugs and feature suggestions, create [issues](https://github.com/Christopher-Hayes/fedi-act/issues). Pull requests are welcome for improvements.
+
+## Thanks to
 
 - **@raikasdev**: For the cross-browser storage API support fix.
 - **@rosemarydotworld**: For the jQuery.DOMNodeAppear customization, filling in where MutationObservers and delegation failed.
-- All the direct [contributors](https://github.com/Lartsch/FediAct/graphs/contributors) to this repository!
+- All the direct [contributors](https://github.com/Christopher-Hayes/fedi-act/graphs/contributors) to this repository!
