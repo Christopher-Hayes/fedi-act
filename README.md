@@ -185,11 +185,22 @@ For planned features and todos, check the [GitHub project](https://github.com/us
 #### Dev: Setup
 
 1. Clone the repository. `git clone https://github.com/Christopher-Hayes/fedi-act.git`
+2. Run `npm install` to install dependencies.
+
+#### Dev: Active Development
+
+In Firefox the general process is:
+
+1. Run `npm run pack` to build the extension.
+2. Open Firefox and navigate to `about:debugging`.
+3. Click "This Firefox" and "Load Temporary Add-on".
+4. Select the firefox ZIP file that was created by `npm run pack`.
+5. Make changes to the code.
+6. Run `npm run pack` again, and click "Reload" on the extension in `about:debugging`.
 
 #### Dev: Building
 
-1. Make sure you're at the root of the project.
-2. Run `./pack.sh <VERSION>`.
+1. Run `npm run pack` to build the extension.
 
 ### Bugs and Feature Suggestions
 
