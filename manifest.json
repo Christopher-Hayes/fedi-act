@@ -1,7 +1,7 @@
 {
   "name": "FediAct",
   "version": "0.9.8.7",
-  "description": "Simplifies interactions on other Mastodon instances than your own. Visit https://github.com/lartsch/FediAct for more.",
+  "description": "Simplifies interactions on other Mastodon instances than your own. Visit https://github.com/Christopher-Hayes/fedi-act for more.",
   "manifest_version": 3,
   "content_scripts": [
     {
