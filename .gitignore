@@ -1,2 +1,31 @@
-*.zip
+# .gitignore file
+
 NOTES.md
+
+# Operating system and editor-specific files
+.DS_Store
+Thumbs.db
+.vscode
+
+# Compiled files, build, and distribution directories
+/dist
+*.class
+*.exe
+*.jar
+*.war
+
+# Log files, cache, or temporary files
+*.log
+*.cache
+*.tmp
+*.zip
+
+# Sensitive data and configuration files
+config.js
+secrets.json
+.env
+
+# Additional directories or files to ignore
+node_modules/
+package-lock.json
+yarn.lock
