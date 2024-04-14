@@ -1,0 +1,22 @@
+{
+  "name": "fedi-act",
+  "version": "1.0.0",
+  "description": "Chrome/Firefox extension that simplifies interactions on other Mastodon instances than your own.",
+  "scripts": {
+    "pack": "node pack.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Christopher-Hayes/fedi-act.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Christopher-Hayes/fedi-act/issues"
+  },
+  "homepage": "https://github.com/Christopher-Hayes/fedi-act#readme",
+  "devDependencies": {
+    "uglify-js": "^3.17.4",
+    "uglifycss": "^0.0.29"
+  }
+}

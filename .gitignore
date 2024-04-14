@@ -27,5 +27,3 @@ secrets.json
 
 # Additional directories or files to ignore
 node_modules/
-package-lock.json
-yarn.lock
