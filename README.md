@@ -37,12 +37,6 @@ This fork has not been pushed to the Firefox or Chrome store yet.
 
 Please use the [manual installation method](#manual-installation).
 
-**Please note:**
-
-- If the webstore release is outdated, consider using the [manual installation method](#manual-installation) to install the latest version.
-- Special installation steps for [Firefox on Android](#install-in-firefox-for-android).
-- Chrome store updates may take 1-2 days longer.
-
 ## Setup
 
 1. Ensure you are logged in to your home server.
