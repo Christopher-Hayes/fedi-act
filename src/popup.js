@@ -1,129 +1,156 @@
-
-// required settings keys with defauls
+// Settings keys with default values
 const settingsDefaults = {
+	// The user's instance URL
 	fediact_homeinstance: null,
+	// Enable alerts
 	fediact_alert: false,
+	// Mode could be either 'whitelist' or 'blacklist'
 	fediact_mode: "blacklist",
+	// Specific accounts to always allow
 	fediact_whitelist: null,
+	// Specific accounts to always block
 	fediact_blacklist: null,
+	// Where to open links by default (_self for the same tab, _blank for a new tab)
 	fediact_target: "_self",
+	// Whether actions should be taken automatically
 	fediact_autoaction: true,
+	// Whether redirects should be followed
 	fediact_redirects: true,
+	// Whether to enable a delay before actions are taken
 	fediact_enabledelay: true,
+	// Whether muted accounts should be hidden
 	fediact_hidemuted: false,
+	// Should the extension run even if the user is logged in
 	fediact_runifloggedin: false,
 }
 
-// fix for cross-browser storage api compatibility
-var browser, chrome, settings
-const enableConsoleLog = true
-const logPrepend = "[FediAct]"
+// Fix for cross-browser storage API compatibility
+var browser, chrome, settings;
+// Enable logging for this file
+const enableConsoleLog = true;
+const logPrepend = "[FediAct]";
 
-// wrapper to prepend to log messages
+// Wrapper to prepend to log messages
 function log(text) {
 	if (enableConsoleLog) {
-		console.log(logPrepend + ' ' + text)
+		console.log(logPrepend + ' ' + text);
 	}
 }
 
-// this performs loading the settings into the popup, reacting to changes and saving changes
+// Handles loading, displaying, and saving settings in the popup
 function popupTasks() {
-	// function to show confirmation when settings were updated successfully
+	// Displays a confirmation message when settings are saved
 	function showConfirmation() {
-		$("span#indicator").show()
+		$("span#indicator").show();
 		setTimeout(function() {
-			$("span#indicator").hide()
-		}, 1500)
+			$("span#indicator").hide();
+		}, 1500);
 	}
-	// get all current values and write them to the local storage
-	async function updateSettings(){
-		// update settings values
-		settings.fediact_homeinstance = $("input#homeinstance").val().trim().toLowerCase()
-		settings.fediact_alert = $("input#alert").is(':checked')
-		settings.fediact_mode = $("select#mode").val()
-		settings.fediact_whitelist = $("textarea#whitelist_content").val()
-		settings.fediact_blacklist = $("textarea#blacklist_content").val()
-		settings.fediact_target = $("select#target").val()
-		settings.fediact_autoaction = $("input#autoaction").is(':checked')
-		settings.fediact_redirects = $("input#redirects").is(':checked')
-		settings.fediact_enabledelay = $("input#delay").is(':checked')
-		settings.fediact_hidemuted = $("input#hidemuted").is(':checked')
-		settings.fediact_runifloggedin = $("input#runifloggedin").is(':checked')
-		// write to storage
+
+	// Saves the form data to local storage
+	async function updateSettings() {
 		try {
-			await (browser || chrome).storage.local.set(settings)
-		} catch {
-			log(e)
-			return false
+			// Update settings to reflect the form inputs
+			settings.fediact_homeinstance = $("input#homeinstance").val().trim().toLowerCase();
+			settings.fediact_alert = $("input#alert").is(':checked');
+			settings.fediact_mode = $("select#mode").val();
+			settings.fediact_whitelist = $("textarea#whitelist_content").val();
+			settings.fediact_blacklist = $("textarea#blacklist_content").val();
+			settings.fediact_target = $("select#target").val();
+			settings.fediact_autoaction = $("input#autoaction").is(':checked');
+			settings.fediact_redirects = $("input#redirects").is(':checked');
+			settings.fediact_enabledelay = $("input#delay").is(':checked');
+			settings.fediact_hidemuted = $("input#hidemuted").is(':checked');
+			settings.fediact_runifloggedin = $("input#runifloggedin").is(':checked');
+
+			// Save the updated settings to the local storage
+			await (browser || chrome).storage.local.set(settings);
+
+			// Show visual confirmation after successful save
+			showConfirmation();
+		} catch (e) {
+			// Log error and indicate that saving failed
+			log(e);
+			return false;
 		}
-		// show saved indicator after successful save
-		showConfirmation()
 	}
-	// restore form based on loaded settings
+
+	// Populates the popup form fields based on saved settings
 	function restoreForm() {
-		// set all default/configured values and show fields accordingly
-		$("input#homeinstance").val(settings.fediact_homeinstance)
-		$("textarea#blacklist_content").val(settings.fediact_blacklist)
-		$("textarea#whitelist_content").val(settings.fediact_whitelist)
-		$("select#mode").val(settings.fediact_mode)
-		$("select#target").val(settings.fediact_target)
-		$("input#alert").prop('checked', settings.fediact_alert)
-		$("input#autoaction").prop('checked', settings.fediact_autoaction)
-		$("input#redirects").prop('checked', settings.fediact_redirects)
-		$("input#delay").prop('checked', settings.fediact_enabledelay)
-		$("input#hidemuted").prop('checked', settings.fediact_hidemuted)
-		$("input#runifloggedin").prop('checked', settings.fediact_runifloggedin)
-		// both containers are hidden by default
+		// Set form inputs to reflect the current settings
+		$("input#homeinstance").val(settings.fediact_homeinstance);
+		$("textarea#blacklist_content").val(settings.fediact_blacklist);
+		$("textarea#whitelist_content").val(settings.fediact_whitelist);
+		$("select#mode").val(settings.fediact_mode);
+		$("select#target").val(settings.fediact_target);
+		$("input#alert").prop('checked', settings.fediact_alert);
+		$("input#autoaction").prop('checked', settings.fediact_autoaction);
+		$("input#redirects").prop('checked', settings.fediact_redirects);
+		$("input#delay").prop('checked', settings.fediact_enabledelay);
+		$("input#hidemuted").prop('checked', settings.fediact_hidemuted);
+		$("input#runifloggedin").prop('checked', settings.fediact_runifloggedin);
+
+		// Initially hide both whitelist and blacklist containers
+		// Then show the appropriate one based on the selected mode
 		if ($("select#mode").val() == "whitelist") {
-			$("div#whitelist_input").removeClass("hide")
-			$("span#allowlabel").removeClass("hide")
+			$("div#whitelist_input").removeClass("hide");
+			$("span#allowlabel").removeClass("hide");
 		} else {
-			$("div#blacklist_input").removeClass("hide")
-			$("span#denylabel").removeClass("hide")
+			$("div#blacklist_input").removeClass("hide");
+			$("span#denylabel").removeClass("hide");
 		}
-		// check changes of the select to update whitelist/blacklist input
+
+		// Listen for changes on the mode select input
+		// to toggle between whitelist and blacklist fields
 		$("select#mode").change(function() {
 			if ($("select#mode").val() == "whitelist") {
-				$("div#blacklist_input").addClass("hide")
-				$("span#denylabel").addClass("hide")
-				$("div#whitelist_input").removeClass("hide")
-				$("span#allowlabel").removeClass("hide")
+				$("div#blacklist_input").addClass("hide");
+				$("span#denylabel").addClass("hide");
+				$("div#whitelist_input").removeClass("hide");
+				$("span#allowlabel").removeClass("hide");
 			} else {
-				$("div#whitelist_input").addClass("hide")
-				$("span#allowlabel").addClass("hide")
-				$("div#blacklist_input").removeClass("hide")
-				$("span#denylabel").removeClass("hide")
+				$("div#whitelist_input").addClass("hide");
+				$("span#allowlabel").addClass("hide");
+				$("div#blacklist_input").removeClass("hide");
+				$("span#denylabel").removeClass("hide");
 			}
-		})
+		});
 	}
+
+	// Initialize when the document is ready
 	$(document).ready(function() {
-		// restore the form values
-		restoreForm()
-		// perform storage actions on form submit
-		$("form#fediact-settings").on('submit', async function(e){
-			// prevent default
-			e.preventDefault()
-			// update settings
-			updateSettings()
+		// Restore current settings to the form on load
+		restoreForm();
+
+		// On form submission, update the settings and send a message to the background script
+		$("form#fediact-settings").on('submit', async function(e) {
+			e.preventDefault(); // Prevent the form from submitting normally
+			await updateSettings(); // Update the settings
 			try {
-				await chrome.runtime.sendMessage({updatedsettings: true})
+				// Inform the background script that settings have been updated
+				await chrome.runtime.sendMessage({updatedsettings: true});
 			} catch(e) {
-				log(e)
+				log(e);
 			}
-		})
-	})
+		});
+	});
 }
 
+// Main function to load settings and start popup tasks
 async function loadAndRun() {
 	try {
-		settings = await (browser || chrome).storage.local.get(settingsDefaults)
+		// Fetch the current settings from local storage
+		settings = await (browser || chrome).storage.local.get(settingsDefaults);
 	} catch(e) {
-		log(e)
-		return false
+		log(e); // Log an error if this fails
+		return false;
 	}
+
+	// If settings were loaded successfully, start the popup tasks
 	if (settings) {
-		popupTasks()
+		popupTasks();
 	}
 }
 
-loadAndRun()
+// Trigger the main function to load settings and initialize the popup
+loadAndRun();

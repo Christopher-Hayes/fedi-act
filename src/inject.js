@@ -2,7 +2,7 @@
 // =-=-=-=-=-= CONSTANTS =-==-=-=-=
 // =-=-=-=-==-=-=-=-==-=-=-=-==-=-=
 
-const followButtonPaths = ["div.account__header button.logo-button","div.public-account-header a.logo-button","div.account-card a.logo-button","div.directory-card a.icon-button", "div.directory__card a.icon-button", "div.detailed-status a.logo-button", "button.remote-button", "div.account__header button.button--follow"]
+const followButtonPaths = ["div.account__header button.logo-button", "div.public-account-header a.logo-button", "div.account-card a.logo-button", "div.directory-card a.icon-button", "div.directory__card a.icon-button", "div.detailed-status a.logo-button", "button.remote-button", "div.account__header button.button--follow"]
 const profileNamePaths = ["div.account__header__tabs__name small", "div.public-account-header__tabs__name small", "div.detailed-status span.display-name__account", "div.display-name > span", "a.user-screen-name", "div.profile-info-panel small"]
 const domainRegex = /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/
 const handleExtractUrlRegex = /^(?<domain>https?:\/\/(?:\.?[a-z0-9-]+)+(?:\.[a-z]+){1})?\/?@(?<handle>\w+)(?:@(?<handledomain>(?:[\w-]+\.)+?\w+))?(?:\/(?<tootid>\d+))?\/?$/
@@ -71,77 +71,105 @@ function log(text) {
 // Custom solution for detecting inserted nodes
 // Works in combination with nodeinserted.css (fixes Firefox blocking addon-inserted <style> elements for sites with CSP)
 // Is more reliable/practicable in certain situations than mutationobserver, who will ignore any node that was inserted with its parent node at once
-(function($) {
-    $.fn.DOMNodeAppear = function(callback, selector) {
-      if (!selector) {
-        return false
-      }
-	  // catch all animationstart events
-      $(document).on('animationstart webkitAnimationStart oanimationstart MSAnimationStart', function(e){
-		// check if the animatonname equals our animation and if the element is one of our selectors
-        if (e.originalEvent.animationName == 'fa_nodeInserted' && $(e.target).is(selector)) {
-          if (typeof callback == 'function') {
-			// return the complete object in the callback
-            callback(e)
-          }
-        }
-      })
-    }
-    jQuery.fn.onAppear = jQuery.fn.DOMNodeAppear
+(function ($) {
+	$.fn.DOMNodeAppear = function (callback, selector) {
+		if (!selector) {
+			return false
+		}
+		// catch all animationstart events
+		$(document).on('animationstart webkitAnimationStart oanimationstart MSAnimationStart', function (e) {
+			// check if the animatonname equals our animation and if the element is one of our selectors
+			if (e.originalEvent.animationName == 'fa_nodeInserted' && $(e.target).is(selector)) {
+				if (typeof callback == 'function') {
+					// return the complete object in the callback
+					callback(e)
+				}
+			}
+		})
+	}
+	jQuery.fn.onAppear = jQuery.fn.DOMNodeAppear
 })(jQuery)
 
-// for checking if logged in on an external instance
+// Define a function that returns a Promise to check if the user is logged in
 function isLoggedIn() {
-	return new Promise(function(resolve) {
+	// Return a new Promise object
+	return new Promise(function (resolve) {
+		// Look for a script tag with id 'initial-state', which contains the login state
 		if ($(document).find("script#initial-state").length) {
-			var initialState = $(document).find("script#initial-state").first()
-			var stateJson = JSON.parse($(initialState).text())
+			// If found, select the first instance of the 'initial-state' script tag
+			var initialState = $(document).find("script#initial-state").first();
+			// Parse its contents as JSON
+			var stateJson = JSON.parse($(initialState).text());
+			// Check if the 'access_token' property exists in the state
 			if (stateJson.meta.access_token) {
-				resolve(true)
+				// If the access token exists, resolve the Promise with true (logged in)
+				resolve(true);
 			}
 		} else {
-			$(document).DOMNodeAppear(function(e) {
-				var initialState = $(e.target)
-				var stateJson = JSON.parse($(initialState).text())
+			// If the initial script tag isn't found, set up a listener for when it appears in the DOM
+			$(document).DOMNodeAppear(function (e) {
+				// Once the script#initial-state appears, grab its state
+				var initialState = $(e.target);
+				// Parse the state JSON from the script's contents
+				var stateJson = JSON.parse($(initialState).text());
+				// Again check for the 'access_token' property
 				if (stateJson.meta.access_token) {
-					resolve(true)
+					// If the access token exists, resolve the Promise with true (logged in)
+					resolve(true);
 				}
-			}, "script#initial-state")
+			}, "script#initial-state"); // The listener is specifically targeting script tag with id 'initial-state'
 		}
-		resolve(false)
+		// If none of the conditions above resolve the Promise, resolve it with false (not logged in)
+		resolve(false);
 	})
 }
 
-// extract given url parameter value
+/**
+ * Function to extract a given parameter value from the current URL's query string.
+ *
+ * @param {string} sParam The parameter name to retrieve the value for.
+ * @returns {string|boolean} The value of the parameter if found, true if the parameter exists but has no value, or false if the parameter does not exist.
+ */
 var getUrlParameter = function getUrlParameter(sParam) {
-    var sPageURL = window.location.search.substring(1),
-        sURLVariables = sPageURL.split('&'), sParameterName, i
-    for (i = 0; i < sURLVariables.length; i++) {
-        sParameterName = sURLVariables[i].split('=')
-        if (sParameterName[0] === sParam) {
-            return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1])
-        }
-    }
-    return false
+	// Remove the leading '?' from the query string and split into an array of 'key=value' strings
+	var sPageURL = window.location.search.substring(1),
+		sURLVariables = sPageURL.split('&'), // Split each 'key=value' pair in the query string
+		sParameterName, // Placeholder for the split result of the 'key=value' string
+		i; // Loop counter
+
+	// Iterate over the array of 'key=value' strings
+	for (i = 0; i < sURLVariables.length; i++) {
+		// Split each 'key=value' string into a [key, value] array
+		sParameterName = sURLVariables[i].split('=');
+
+		// Check if the current parameter key matches the one we're looking for (sParam)
+		if (sParameterName[0] === sParam) {
+			// If a parameter has no value after '=', return 'true' (this indicates presence of parameter)
+			// Otherwise, decode the parameter value and return it.
+			return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+		}
+	}
+	// If we reach here, the parameter was not found, return 'false'
+	return false;
 }
 
 const asyncLimit = (fn, n) => {
 	let pendingPromises = []
 	return async function (...args) {
-	  while (pendingPromises.length >= n) {
-		await Promise.race(pendingPromises).catch(() => {})
-	  }
-	  const p = fn.apply(this, args)
-	  pendingPromises.push(p)
-	  await p.catch(() => {})
-	  pendingPromises = pendingPromises.filter(pending => pending !== p)
-	  return p
+		while (pendingPromises.length >= n) {
+			await Promise.race(pendingPromises).catch(() => { })
+		}
+		const p = fn.apply(this, args)
+		pendingPromises.push(p)
+		await p.catch(() => { })
+		pendingPromises = pendingPromises.filter(pending => pending !== p)
+		return p
 	}
-  }
+}
 
 // promisified xhr for api calls
 function makeRequest(method, url, extraheaders, jsonbody) {
-	return new Promise(async function(resolve) {
+	return new Promise(async function (resolve) {
 		// try to prevent error 429 too many request by delaying home instance requests
 		if (~url.indexOf(settings.fediact_homeinstance) && settings.fediact_enabledelay) {
 			// get current time
@@ -152,16 +180,16 @@ function makeRequest(method, url, extraheaders, jsonbody) {
 			if (difference < apiDelay) {
 				// ... then wait the time required to reach the api delay value...
 				await new Promise(resolve => {
-					setTimeout(function() {
+					setTimeout(function () {
 						resolve()
-					}, apiDelay-difference)
+					}, apiDelay - difference)
 				})
 			}
 			tmpSettings.lasthomerequest = Date.now()
 		}
 		try {
-			await chrome.runtime.sendMessage({requestdata: [method, url, extraheaders, jsonbody]}, function(response) {
-				if(response) {
+			await chrome.runtime.sendMessage({ requestdata: [method, url, extraheaders, jsonbody] }, function (response) {
+				if (response) {
 					resolve(response)
 				} else {
 					resolve(false)
@@ -182,7 +210,7 @@ const requestAsyncLimited = asyncLimit(makeRequest, maxAsyncRequests)
 // Escape characters used for regex
 function escapeRegExp(string) {
 	return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
-  }
+}
 
 // Replace all occurrences of a substring
 function replaceAll(str, find, replace) {
@@ -196,7 +224,7 @@ function redirectTo(url) {
 		if (settings.fediact_target == "_self") {
 			/* If browser back button was used, flush cache */
 			(function () {
-				window.onpageshow = function(event) {
+				window.onpageshow = function (event) {
 					if (event.persisted) {
 						window.location.reload();
 					}
@@ -239,71 +267,71 @@ async function executeAction(data, action, polldata) {
 			return true
 		case 'domainblock':
 			requestUrl = 'https://' + settings.fediact_homeinstance + domainBlocksApi + "?domain=" + data
-			condition = function(response) {if(response){return true}}
-			after = async function() {await updateMutedBlocked()}
+			condition = function (response) { if (response) { return true } }
+			after = async function () { await updateMutedBlocked() }
 			break
 		case 'domainunblock':
 			requestUrl = 'https://' + settings.fediact_homeinstance + domainBlocksApi + "?domain=" + data
-			condition = function(response) {if(response){return true}}
+			condition = function (response) { if (response) { return true } }
 			method = "DELETE"
-			after = async function() {await updateMutedBlocked()}
+			after = async function () { await updateMutedBlocked() }
 			break
 		case 'mute':
 			requestUrl = 'https://' + settings.fediact_homeinstance + accountsApi + "/" + data + "/mute"
-			condition = function(response) {return response.muting}
-			after = async function() {await updateMutedBlocked()}
+			condition = function (response) { return response.muting }
+			after = async function () { await updateMutedBlocked() }
 			break
 		case 'unmute':
 			requestUrl = 'https://' + settings.fediact_homeinstance + accountsApi + "/" + data + "/unmute"
-			condition = function(response) {return !response.muting}
-			after = async function() {await updateMutedBlocked()}
+			condition = function (response) { return !response.muting }
+			after = async function () { await updateMutedBlocked() }
 			break
 		case 'block':
 			requestUrl = 'https://' + settings.fediact_homeinstance + accountsApi + "/" + data + "/block"
-			condition = function(response) {return response.blocking}
-			after = async function() {await updateMutedBlocked()}
+			condition = function (response) { return response.blocking }
+			after = async function () { await updateMutedBlocked() }
 			break
 		case 'unblock':
 			requestUrl = 'https://' + settings.fediact_homeinstance + accountsApi + "/" + data + "/unblock"
-			condition = function(response) {return !response.blocking}
-			after = async function() {await updateMutedBlocked()}
+			condition = function (response) { return !response.blocking }
+			after = async function () { await updateMutedBlocked() }
 			break
 		case 'vote':
 			requestUrl = 'https://' + settings.fediact_homeinstance + pollsApi + "/" + data + "/votes"
-			condition = function(response) {return response.voted}
+			condition = function (response) { return response.voted }
 			jsonbody = polldata
 			break
 		case 'follow':
 			requestUrl = 'https://' + settings.fediact_homeinstance + accountsApi + "/" + data + "/follow"
-			condition = function(response) {return response.following || response.requested}
+			condition = function (response) { return response.following || response.requested }
 			break
 		case 'boost':
 			requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/" + data + "/reblog"
-			condition = function(response) {return response.reblogged}
+			condition = function (response) { return response.reblogged }
 			break
 		case 'favourite':
-			requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/"  + data + "/favourite"
-			condition = function(response) {return response.favourited}
+			requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/" + data + "/favourite"
+			condition = function (response) { return response.favourited }
 			break
 		case 'bookmark':
-			requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/"  + data + "/bookmark"
-			condition = function(response) {return response.bookmarked}
+			requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/" + data + "/bookmark"
+			condition = function (response) { return response.bookmarked }
 			break
 		case 'unfollow':
 			requestUrl = 'https://' + settings.fediact_homeinstance + accountsApi + "/" + data + "/unfollow"
-			condition = function(response) {return !response.following && !response.requested}
+			condition = function (response) { return !response.following && !response.requested }
 			break
 		case 'unboost':
 			requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/" + data + "/unreblog"
-			condition = function(response) {return !response.reblogged}
+			condition = function (response) { return !response.reblogged }
 			break
 		case 'unfavourite':
-			requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/"  + data + "/unfavourite"
-			condition = function(response) {return !response.favourited}
+			requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/" + data + "/unfavourite"
+			condition = function (response) { return !response.favourited }
 			break
 		case 'unbookmark':
-			requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/"  + data + "/unbookmark"
-			condition = function(response) {return !response.bookmarked}
+			requestUrl = 'https://' + settings.fediact_homeinstance + statusApi + "/" + data + "/unbookmark"
+			condition = function (response) { return !response.bookmarked }
 			break
 		default:
 			log("No valid action specified.")
@@ -363,7 +391,7 @@ function clearHandle(handle) {
 		handle = handle.slice(1)
 	}
 	// add local uri if handle has no domain already
-	if (handle.split("@").length-1 == 0) {
+	if (handle.split("@").length - 1 == 0) {
 		handle = handle + "@" + tmpSettings.exturi
 	}
 	return handle
@@ -447,10 +475,10 @@ async function resolveTootToHome(searchstring) {
 function resolveTootToExternalHome(tooturl) {
 	// TODO: check if a delay is necessary here too
 	if (tooturl) {
-		return new Promise(async function(resolve) {
+		return new Promise(async function (resolve) {
 			try {
-				await chrome.runtime.sendMessage({externaltoot: tooturl}, function(response) {
-					if(response) {
+				await chrome.runtime.sendMessage({ externaltoot: tooturl }, function (response) {
+					if (response) {
 						resolve(response)
 					} else {
 						resolve(false)
@@ -487,7 +515,7 @@ function toggleInlineCss(el, styles, toggleclass) {
 			// otherwise, if the second value is "!remove"...
 			if (style[1] == "!remove") {
 				// remove the inline css by regex replacing
-				var newinline = replaceAll($(el).attr('style'), style[0]+": "+style[2]+";", "")
+				var newinline = replaceAll($(el).attr('style'), style[0] + ": " + style[2] + ";", "")
 				$(el).attr('style', newinline)
 			} else {
 				// otherwise set the second value as style
@@ -520,15 +548,15 @@ function addToProcessedToots(toot) {
 	// if diff is greater than 0...
 	if (diff > 0) {
 		// remove the first diff items from it
-		tmpSettings.processed = tmpSettings.processed.splice(0,diff)
+		tmpSettings.processed = tmpSettings.processed.splice(0, diff)
 	}
 	return tmpSettings.processed.length - 1
 }
 
 function updateMutedBlocked() {
-	return new Promise(async function(resolve) {
+	return new Promise(async function (resolve) {
 		try {
-			await chrome.runtime.sendMessage({updatemutedblocked: true}, async function(response) {
+			await chrome.runtime.sendMessage({ updatemutedblocked: true }, async function (response) {
 				if (response) {
 					if (!await getSettings()) {
 						// but reload if settings are invalid
@@ -577,7 +605,7 @@ function showModal(settings) {
 					$(baseEl).css("animation", "fadeOut .2s .7s forwards")
 					$(baseEl).find(".fediactmodalinner").css("animation", "scaleInFade .2s .7s forwards reverse")
 					await new Promise(resolve => {
-						setTimeout(function() {
+						setTimeout(function () {
 							resolve()
 						}, 1000)
 					})
@@ -590,7 +618,7 @@ function showModal(settings) {
 					$(baseEl).css("animation", "fadeOut .2s .7s forwards")
 					$(baseEl).find(".fediactmodalinner").css("animation", "scaleInFade .2s .7s forwards reverse")
 					await new Promise(resolve => {
-						setTimeout(function() {
+						setTimeout(function () {
 							resolve()
 						}, 1000)
 					})
@@ -634,7 +662,7 @@ function addFediElements() {
 // trigger the reply button click - will only run when we are on a home instance url with fedireply parameter
 async function processReply() {
 	// wait for the detailed status action bar to appear
-	$(document).DOMNodeAppear(function(e) {
+	$(document).DOMNodeAppear(function (e) {
 		// find the reply button and click it
 		$(e.target).find("button:has(i.fa-reply), button:has(i.fa-reply-all)").click()
 	}, "div.detailed-status__action-bar")
@@ -656,7 +684,7 @@ async function processToots() {
 				// nope, so it will be a boost
 				action = "boost"
 			}
-		// repeat for favourite and bookmark
+			// repeat for favourite and bookmark
 		} else if ($(e.currentTarget).children("i.fa-star").length) {
 			if ($(e.currentTarget).hasClass("fediactive")) {
 				action = "unfavourite"
@@ -669,8 +697,8 @@ async function processToots() {
 			} else {
 				action = "bookmark"
 			}
-		// should rarely reach this point, but some v3 instances include the action in the href only, so we have this as a fallback
-		// (v3 public view does NOT have a bookmark button)
+			// should rarely reach this point, but some v3 instances include the action in the href only, so we have this as a fallback
+			// (v3 public view does NOT have a bookmark button)
 		} else if ($(e.currentTarget).attr("href")) {
 			// does the href include "type=reblog"?
 			if (~$(e.currentTarget).attr("href").indexOf("type=reblog")) {
@@ -680,7 +708,7 @@ async function processToots() {
 				} else {
 					action = "boost"
 				}
-			// repeat for favourite
+				// repeat for favourite
 			} else if (~$(e.currentTarget).attr("href").indexOf("type=favourite")) {
 				if ($(e.currentTarget).hasClass("fediactive")) {
 					action = "unfavourite"
@@ -729,11 +757,11 @@ async function processToots() {
 			// we will use the last part of the URL path - this should be more universal than always selecting the fifth "/" slice
 			var temp = window.location.href.split("?")[0].split("/")
 			return (temp.pop() || temp.pop())
-		// otherwise check if current element has data-id attribute
+			// otherwise check if current element has data-id attribute
 		} else if ($(el).attr("data-id")) {
 			// split by "-" to respect some ids startin with "f-"
 			return $(el).attr("data-id").split("-").slice(-1)[0]
-		// otherwise do the same for any closest article or div with the data-id attribute
+			// otherwise do the same for any closest article or div with the data-id attribute
 		} else if ($(el).closest("article[data-id], div[data-id]").length) {
 			return $(el).closest("article[data-id], div[data-id]").first().attr("data-id").split("-").slice(-1)[0]
 		} else if ($(el).find("a.icon-button:has(i.fa-star), a.detailed-status__link:has(i.fa-star)").length) {
@@ -758,7 +786,7 @@ async function processToots() {
 		} else if ($(el).find("a.modal-button").length) {
 			return tootHrefCheck($(el).find("a.modal-button").first().attr("href").split("?")[0])
 		}
-		return [false,undefined]
+		return [false, undefined]
 	}
 	// check toot author, mentions and toot prepend mentions for applying mutes
 	function processMutes(el, tootAuthor) {
@@ -772,7 +800,7 @@ async function processToots() {
 			}
 			// build array of mentions in @user@domain.com format
 			// NOTE: this will fail if ax external user handle uses another subdomain than hostname, but FediAct was not designed for that - this is best effort
-			$(el).find("span.h-card").each(function() {
+			$(el).find("span.h-card").each(function () {
 				hrefs.push($(this).find("a").attr("href").split("?")[0])
 			})
 			var processedHrefs = []
@@ -792,7 +820,7 @@ async function processToots() {
 					processedHrefs.push(lastpart + "@" + tmpSettings.exturi)
 				}
 			}
-			if (processedHrefs.some(r=> checkAllMutedBlocked(r)) || checkAllMutedBlocked(tootAuthor)) {
+			if (processedHrefs.some(r => checkAllMutedBlocked(r)) || checkAllMutedBlocked(tootAuthor)) {
 				$(el).hide()
 				if (prepended) {
 					$(prepended).hide()
@@ -896,21 +924,21 @@ async function processToots() {
 							// if the action was successfully executed, update the element styles
 							if (action == "boost" || action == "unboost") {
 								// toggle inline css styles
-								toggleInlineCss($(e.currentTarget),[["color","!remove","rgb(140, 141, 255)"]], "fediactive")
-								toggleInlineCss($(e.currentTarget).find("i"),[["transition-duration", "!remove", "0.9s"],["background-position", "!remove", "0px 100%"]], "fediactive")
+								toggleInlineCss($(e.currentTarget), [["color", "!remove", "rgb(140, 141, 255)"]], "fediactive")
+								toggleInlineCss($(e.currentTarget).find("i"), [["transition-duration", "!remove", "0.9s"], ["background-position", "!remove", "0px 100%"]], "fediactive")
 								// update element in cache if exists
 								if (cacheIndex) {
 									tmpSettings.processed[cacheIndex][3] = !tmpSettings.processed[cacheIndex][3]
 								}
-							// same for favourite, bookmarked....
+								// same for favourite, bookmarked....
 							} else if (action == "favourite" || action == "unfavourite") {
-								toggleInlineCss($(e.currentTarget),[["color","!remove","rgb(202, 143, 4)"]], "fediactive")
-								toggleInlineCss($(e.currentTarget).find("i"),[["animation","spring-rotate-out 1s linear","spring-rotate-in 1s linear"]], "fediactive")
+								toggleInlineCss($(e.currentTarget), [["color", "!remove", "rgb(202, 143, 4)"]], "fediactive")
+								toggleInlineCss($(e.currentTarget).find("i"), [["animation", "spring-rotate-out 1s linear", "spring-rotate-in 1s linear"]], "fediactive")
 								if (cacheIndex) {
 									tmpSettings.processed[cacheIndex][4] = !tmpSettings.processed[cacheIndex][4]
 								}
 							} else {
-								toggleInlineCss($(e.currentTarget),[["color","!remove","rgb(255, 80, 80)"]], "fediactive")
+								toggleInlineCss($(e.currentTarget), [["color", "!remove", "rgb(255, 80, 80)"]], "fediactive")
 								if (cacheIndex) {
 									tmpSettings.processed[cacheIndex][5] = !tmpSettings.processed[cacheIndex][5]
 								}
@@ -953,7 +981,7 @@ async function processToots() {
 						// set voteButton
 						voteButton = $(el).find("div.poll button").first()
 						// set handling for all new clicks
-						$(spoilerButton).on("click", function(e) {
+						$(spoilerButton).on("click", function (e) {
 							// prevent default etc.
 							e.preventDefault()
 							e.stopImmediatePropagation()
@@ -964,8 +992,8 @@ async function processToots() {
 								$(spanText).text("Show less")
 							}
 							// toggle the css manually to hide/show the content/poll
-							toggleInlineCss($(el).find("div.poll").first(),[["display","block","none"]], "fedihideshow")
-							toggleInlineCss($(el).find("div.status__content__text").first(),[["display","block","none"]], "fedihideshow")
+							toggleInlineCss($(el).find("div.poll").first(), [["display", "block", "none"]], "fedihideshow")
+							toggleInlineCss($(el).find("div.status__content__text").first(), [["display", "block", "none"]], "fedihideshow")
 						})
 						// click again so it is hidden by default, like usually
 						$(spoilerButton).click()
@@ -974,20 +1002,20 @@ async function processToots() {
 					// set the toot buttons to active, depending on the state of the resolved toot and if the element already has the active class
 					if (tootdata[4]) {
 						if (!$(favButton).hasClass("fediactive")) {
-							toggleInlineCss($(favButton),[["color","!remove","rgb(202, 143, 4)"]], "fediactive")
-							toggleInlineCss($(favButton).find("i"),[["animation","spring-rotate-out 1s linear","spring-rotate-in 1s linear"]], "fediactive")
+							toggleInlineCss($(favButton), [["color", "!remove", "rgb(202, 143, 4)"]], "fediactive")
+							toggleInlineCss($(favButton).find("i"), [["animation", "spring-rotate-out 1s linear", "spring-rotate-in 1s linear"]], "fediactive")
 						}
 					}
 					// repeat for other buttons
 					if (tootdata[3]) {
 						if (!$(boostButton).find("i.fediactive").length) {
-							toggleInlineCss($(boostButton),[["color","!remove","rgb(140, 141, 255)"]], "fediactive")
-							toggleInlineCss($(boostButton).find("i"),[["transition-duration", "!remove", "0.9s"],["background-position", "!remove", "0px 100%"]], "fediactive")
+							toggleInlineCss($(boostButton), [["color", "!remove", "rgb(140, 141, 255)"]], "fediactive")
+							toggleInlineCss($(boostButton).find("i"), [["transition-duration", "!remove", "0.9s"], ["background-position", "!remove", "0px 100%"]], "fediactive")
 						}
 					}
 					if (tootdata[5]) {
 						if (!$(bookmarkButton).hasClass("fediactive")) {
-							toggleInlineCss($(bookmarkButton),[["color","!remove","rgb(255, 80, 80)"]], "fediactive")
+							toggleInlineCss($(bookmarkButton), [["color", "!remove", "rgb(255, 80, 80)"]], "fediactive")
 						}
 					}
 					if (tootdata[10]) {
@@ -1001,43 +1029,43 @@ async function processToots() {
 				var domainsplit = tootdata[1].split("@")
 				var domain = domainsplit.pop() || domainsplit.pop()
 				// reply button is simple, it will always redirect to the homeinstance with the fedireply parameter set
-				$(replyButton).on("click", function(e){
+				$(replyButton).on("click", function (e) {
 					// prevent default and immediate propagation
 					e.preventDefault()
 					e.stopImmediatePropagation()
 					if (e.originalEvent.isTrusted) {
 						// redirect to the resolved URL + fedireply parameter (so the extension can handle it after redirect)
-						redirectTo(tootdata[7]+"?fedireply")
+						redirectTo(tootdata[7] + "?fedireply")
 					}
 				})
-				$(moreButton).on("click", function(e){
+				$(moreButton).on("click", function (e) {
 					// prevent default and immediate propagation
 					e.preventDefault()
 					e.stopImmediatePropagation()
 					if (e.originalEvent.isTrusted) {
 						var modalLinks = []
 						if (isBlocked(tootdata[1])) {
-							modalLinks.push(["unblock",tootdata[6],"Unblock user"])
+							modalLinks.push(["unblock", tootdata[6], "Unblock user"])
 						} else {
-							modalLinks.push(["block",tootdata[6],"Block user"])
+							modalLinks.push(["block", tootdata[6], "Block user"])
 						}
 						if (isMuted(tootdata[1])) {
-							modalLinks.push(["unmute",tootdata[6],"Unmute user"])
+							modalLinks.push(["unmute", tootdata[6], "Unmute user"])
 						} else {
-							modalLinks.push(["mute",tootdata[6],"Mute user"])
+							modalLinks.push(["mute", tootdata[6], "Mute user"])
 						}
 						if (isDomainBlocked(tootdata[1])) {
-							modalLinks.push(["domainunblock",domain,"Unblock domain"])
+							modalLinks.push(["domainunblock", domain, "Unblock domain"])
 						} else {
-							modalLinks.push(["domainblock",domain,"Block domain"])
+							modalLinks.push(["domainblock", domain, "Block domain"])
 						}
-						modalLinks.push(["copy",tootdata[12],"Copy URL"])
-						modalLinks.push(["copy",tootdata[7],"Copy home URL"])
+						modalLinks.push(["copy", tootdata[12], "Copy URL"])
+						modalLinks.push(["copy", tootdata[7], "Copy home URL"])
 						showModal(modalLinks)
 					}
 				})
 				// for all other buttons...
-				$([favButton, boostButton, bookmarkButton, voteButton]).each(function() {
+				$([favButton, boostButton, bookmarkButton, voteButton]).each(function () {
 					if ($(voteButton).length) {
 						if ($(voteButton).get(0).isEqualNode($(this).get(0))) {
 							var isVote = true
@@ -1048,7 +1076,7 @@ async function processToots() {
 					// init function global vars required for single/double click handling
 					var clicks = 0
 					var timer
-					$(this).on("click", async function(e) {
+					$(this).on("click", async function (e) {
 						// prevent default and immediate propagation
 						e.preventDefault()
 						e.stopImmediatePropagation()
@@ -1057,7 +1085,7 @@ async function processToots() {
 							clicks++
 							// this will always run, but see below for double click handling
 							if (clicks == 1) {
-								timer = setTimeout(async function() {
+								timer = setTimeout(async function () {
 									if (isVote && !tootdata[10]) {
 										var actionExecuted = pollAction(tootdata[9], tootdata[7], e)
 									} else {
@@ -1090,7 +1118,7 @@ async function processToots() {
 								clicks = 0
 							}
 						}
-					}).on("dblclick", function(e) {
+					}).on("dblclick", function (e) {
 						// default dblclick event must be prevented
 						e.preventDefault()
 						e.stopImmediatePropagation()
@@ -1131,7 +1159,7 @@ async function processToots() {
 							// add resolve strings for both formats on the current external instance
 							homeResolveStrings.push(location.protocol + "//" + location.hostname + "/users/" + matches.groups.handle + "/statuses/" + internalTootId)
 							homeResolveStrings.push(location.protocol + "//" + location.hostname + "/@" + matches.groups.handle + "/" + internalTootId)
-						// otherwise, start external resolve process if not done already for one of the internalTootIds
+							// otherwise, start external resolve process if not done already for one of the internalTootIds
 						} else if (!extHomeResolved) {
 							var extResolveString = location.protocol + '//' + location.hostname + "/" + tootAuthor + "/" + internalTootId
 							var resolveTootHome = await resolveTootToExternalHome(extResolveString)
@@ -1146,7 +1174,7 @@ async function processToots() {
 									if (tmpmatches.groups.handle && tmpmatches.groups.tootid && tmpmatches.groups.domain) {
 										homeResolveStrings.push(tmpmatches.groups.domain + "/@" + tmpmatches.groups.handle + "/" + tmpmatches.groups.tootid)
 									}
-								// otherwise, if it matches the @ format, also add the URI format
+									// otherwise, if it matches the @ format, also add the URI format
 								} else if (handleExtractUrlRegex.test(resolveTootHome)) {
 									var tmpmatches = resolveTootHome.match(handleExtractUrlRegex)
 									if (tmpmatches.groups.handle && tmpmatches.groups.tootid && tmpmatches.groups.domain) {
@@ -1195,7 +1223,7 @@ async function processToots() {
 						clickBinder(fullEntry)
 					} else {
 						// no, but we will still add the toot to cache as unresolved
-						log("Failed to resolve: "+homeResolveStrings)
+						log("Failed to resolve: " + homeResolveStrings)
 						cacheIndex = addToProcessedToots([internalIdentifier, false])
 						initStyles([internalIdentifier, false])
 					}
@@ -1220,14 +1248,14 @@ async function processToots() {
 		}
 	}
 	// One DOMNodeAppear to rule them all
-	$(document).DOMNodeAppear(async function(e) {
+	$(document).DOMNodeAppear(async function (e) {
 		if (!tmpSettings.isProcessing.includes($(e.target).get(0))) {
 			tmpSettings.isProcessing.push($(e.target).get(0))
 			process($(e.target))
 		}
 	}, "div.status, div.detailed-status")
 	// try to find all existing elements (fixes some elements not being detected by DOMNodeAppear in rare cases, esp. v3)
-	$(document).find("div.status, div.detailed-status").each(function(){
+	$(document).find("div.status, div.detailed-status").each(function () {
 		if (!tmpSettings.isProcessing.includes($(this).get(0))) {
 			tmpSettings.isProcessing.push($(this).get(0))
 			process($(this))
@@ -1253,18 +1281,18 @@ async function processProfile() {
 					if ($(icon).length) {
 						$(icon).removeClass("fa-user-plus").addClass("fa-user")
 						$(el).append("-")
-						$(el).attr("title","Unfollow")
+						$(el).attr("title", "Unfollow")
 					} else {
 						$(el).text("Unfollow")
 					}
 					action = "unfollow"
 					return true
-				// repeat for unfollow action
+					// repeat for unfollow action
 				} else if (action == "unfollow" && response) {
 					if ($(icon).length) {
 						$(icon).removeClass("fa-user").addClass("fa-user-plus")
 						$(el).contents().filter((_, node) => node.nodeType === 3).remove()
-						$(el).attr("title","Follow")
+						$(el).attr("title", "Follow")
 					} else {
 						$(el).text("Follow")
 					}
@@ -1279,7 +1307,7 @@ async function processProfile() {
 		// for mastodon v3 explore page
 		if ($(el).closest("div.account-card").length) {
 			fullHandle = $(el).closest("div.account-card").find("div.display-name > span").text().trim()
-		} else if($(el).closest("div.directory__card").length) {
+		} else if ($(el).closest("div.directory__card").length) {
 			fullHandle = $(el).closest("div.directory__card").find("div.display-name > span").text().trim()
 			icon = $(el).find("i").first()
 		} else {
@@ -1287,7 +1315,7 @@ async function processProfile() {
 			for (const selector of profileNamePaths) {
 				if ($(selector).length) {
 					fullHandle = $(selector).text().trim()
-					if (fullHandle.split("@").length-1 == 1) {
+					if (fullHandle.split("@").length - 1 == 1) {
 						fullHandle = fullHandle + "@" + tmpSettings.exturi
 					}
 					break
@@ -1316,48 +1344,48 @@ async function processProfile() {
 						if ($(icon).length) {
 							$(icon).removeClass("fa-user-plus").addClass("fa-user")
 							$(el).append("-")
-							$(el).attr("title","Unfollow")
+							$(el).attr("title", "Unfollow")
 						} else {
 							$(el).text("Unfollow")
 						}
 						action = "unfollow"
 					}
-					$(moreButton).on("click", function(e){
+					$(moreButton).on("click", function (e) {
 						// prevent default and immediate propagation
 						e.preventDefault()
 						e.stopImmediatePropagation()
 						if (e.originalEvent.isTrusted) {
 							var modalLinks = []
 							if (isBlocked(fullHandle)) {
-								modalLinks.push(["unblock",resolvedHandle[0],"Unblock user"])
+								modalLinks.push(["unblock", resolvedHandle[0], "Unblock user"])
 							} else {
-								modalLinks.push(["block",resolvedHandle[0],"Block user"])
+								modalLinks.push(["block", resolvedHandle[0], "Block user"])
 							}
 							if (isMuted(fullHandle)) {
-								modalLinks.push(["unmute",resolvedHandle[0],"Unmute user"])
+								modalLinks.push(["unmute", resolvedHandle[0], "Unmute user"])
 							} else {
-								modalLinks.push(["mute",resolvedHandle[0],"Mute user"])
+								modalLinks.push(["mute", resolvedHandle[0], "Mute user"])
 							}
 							if (isDomainBlocked(fullHandle)) {
-								modalLinks.push(["domainunblock",domain,"Unblock domain"])
+								modalLinks.push(["domainunblock", domain, "Unblock domain"])
 							} else {
-								modalLinks.push(["domainblock",domain,"Block domain"])
+								modalLinks.push(["domainblock", domain, "Block domain"])
 							}
-							modalLinks.push(["copy",redirectUrl,"Copy home URL"])
+							modalLinks.push(["copy", redirectUrl, "Copy home URL"])
 							showModal(modalLinks)
 						}
 					})
 					// single and double click handling (see toot processing for explanation, is the same basically)
 					var clicks = 0
 					var timer
-					$(el).on("click", async function(e) {
+					$(el).on("click", async function (e) {
 						// prevent default and immediate propagation
 						e.preventDefault()
 						e.stopImmediatePropagation()
 						if (e.originalEvent.isTrusted) {
 							clicks++
 							if (clicks == 1) {
-								timer = setTimeout(async function() {
+								timer = setTimeout(async function () {
 									execFollow(resolvedHandle[0])
 									clicks = 0
 								}, 350)
@@ -1372,7 +1400,7 @@ async function processProfile() {
 										var saveText = $(el).text()
 										$(el).text("Redirecting...")
 									}
-									setTimeout(function() {
+									setTimeout(function () {
 										redirectTo(redirectUrl)
 										if ($(icon).length) {
 											$(icon).attr("class", classes)
@@ -1386,7 +1414,7 @@ async function processProfile() {
 								clicks = 0
 							}
 						}
-					}).on("dblclick", function(e) {
+					}).on("dblclick", function (e) {
 						e.preventDefault()
 						e.stopImmediatePropagation()
 					})
@@ -1400,14 +1428,14 @@ async function processProfile() {
 	// create css selector from selector array
 	var allFollowPaths = followButtonPaths.join(",")
 	// one domnodeappear to rule them all
-	$(document).DOMNodeAppear(async function(e) {
+	$(document).DOMNodeAppear(async function (e) {
 		if (!tmpSettings.isProcessing.includes($(e.target).get(0))) {
 			tmpSettings.isProcessing.push($(e.target).get(0))
 			process($(e.target))
 		}
 	}, allFollowPaths)
 	// try to find all existing elements (fixes some elements not being detected by DOMNodeAppear in rare cases, esp. v3)
-	$(document).find(allFollowPaths).each(function(){
+	$(document).find(allFollowPaths).each(function () {
 		if (!tmpSettings.isProcessing.includes($(this).get(0))) {
 			tmpSettings.isProcessing.push($(this).get(0))
 			process($(this))
@@ -1452,7 +1480,7 @@ function checkSettings() {
 		log("No API token available. Are you logged in to your home instance? If yes, wait for 1-2 minutes and reload page.")
 		return false
 	} else {
-		tmpSettings.tokenheader = {"Authorization":"Bearer " + settings.fediact_token,}
+		tmpSettings.tokenheader = { "Authorization": "Bearer " + settings.fediact_token, }
 	}
 	// if the value looks like a domain...
 	if (!(domainRegex.test(settings.fediact_homeinstance))) {
@@ -1535,7 +1563,7 @@ async function checkSite() {
 
 async function backgroundProcessor() {
 	// wait for any url change messages from background script
-	chrome.runtime.onMessage.addListener(async function(request, sender, sendResponse) {
+	chrome.runtime.onMessage.addListener(async function (request, sender, sendResponse) {
 		if (request.urlchanged) {
 			// reset already processed elements
 			tmpSettings.processed = []
@@ -1561,9 +1589,9 @@ async function backgroundProcessor() {
 	})
 	// send message to initialize onUpdated listener in background script (this way it gets the tabid and we do not need to bind the listener for ALL sites)
 	try {
-		await chrome.runtime.sendMessage({running: true})
+		await chrome.runtime.sendMessage({ running: true })
 		return true
-	} catch(e) {
+	} catch (e) {
 		log(e)
 	}
 	return false
@@ -1571,10 +1599,10 @@ async function backgroundProcessor() {
 
 function getSettings() {
 	// get setting
-	return new Promise(async function(resolve) {
+	return new Promise(async function (resolve) {
 		try {
 			settings = await (browser || chrome).storage.local.get(settingsDefaults)
-		} catch(e) {
+		} catch (e) {
 			log(e)
 			resolve(false)
 			return
