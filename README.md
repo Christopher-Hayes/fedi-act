@@ -1,4 +1,4 @@
-# Fork - FediAct (v0.9.8)
+# fedi-act (April 2024 fork)
 
 A Chrome/Firefox extension that simplifies follow and post interactions on Mastodon servers other than your own.
 
@@ -14,6 +14,11 @@ This is a fork of the original project by @lartsch. Original repository: [lartsc
 - Hide muted content on external servers if enabled
 - Requires only your home server domain to work
 
+## This fork
+
+- Includes the [PR from @nachtjasmin](https://github.com/Lartsch/FediAct/pull/75) to fix FediAct breaking styling on other pages
+- Minor fixes to allow button icons to highlight more reliably when you click on reply/boost/favorite/bookmark
+
 ## Navigation
 
 - [Installation](#installation)
@@ -28,11 +33,15 @@ This is a fork of the original project by @lartsch. Original repository: [lartsc
 
 ## Installation
 
-[<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/chrome/chrome.svg" width="48" alt="Chrome" />](https://chrome.google.com/webstore/detail/fediact/lmpcajpkjcclkjbliapfjfolocffednm) [![Chrome Webstore](https://img.shields.io/chrome-web-store/v/lmpcajpkjcclkjbliapfjfolocffednm.svg?label=%20)](https://chrome.google.com/webstore/detail/fediact/lmpcajpkjcclkjbliapfjfolocffednm)  
+# [<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/chrome/chrome.svg" width="48" alt="Chrome" />](https://chrome.google.com/webstore/detail/fediact/lmpcajpkjcclkjbliapfjfolocffednm) [![Chrome Webstore](https://img.shields.io/chrome-web-store/v/lmpcajpkjcclkjbliapfjfolocffednm.svg?label=%20)](https://chrome.google.com/webstore/detail/fediact/lmpcajpkjcclkjbliapfjfolocffednm)  
 All up-to-date Chromium browsers, including Kiwi and Yandex browsers on Android
 
-[<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/firefox/firefox.svg" width="48" alt="Firefox" />](https://addons.mozilla.org/en-US/firefox/addon/fediact/) [![Mozilla Addon Store](https://img.shields.io/amo/v/fediact.svg?label=%20%20)](https://addons.mozilla.org/en-US/firefox/addon/fediact/)  
+# [<img src="https://raw.githubusercontent.com/alrra/browser-logos/90fdf03c/src/firefox/firefox.svg" width="48" alt="Firefox" />](https://addons.mozilla.org/en-US/firefox/addon/fediact/) [![Mozilla Addon Store](https://img.shields.io/amo/v/fediact.svg?label=%20%20)](https://addons.mozilla.org/en-US/firefox/addon/fediact/)  
 Up-to-date Firefox (v107+), including Firefox Nightly on Android
+
+This fork has not been pushed to the Firefox or Chrome store yet.
+
+Please use the [manual installation method](#manual-installation).
 
 **Please note:**
 
@@ -126,6 +135,8 @@ Firefox on Android restricts installations to a [curated list of addons](https:/
 
 **Requirements:**
 
+NOTE - The following steps won't work in this fork yet. It hasn't been pushed to stores yet.
+
 - Firefox [**Nightly**](https://play.google.com/store/apps/details?id=org.mozilla.fenix) for Android
 
 **Steps:**
@@ -186,6 +197,7 @@ For bugs and feature suggestions, create [issues](https://github.com/Christopher
 
 ## Thanks to
 
+- **@lartsch**: For 95% of the code in this fork.
 - **@raikasdev**: For the cross-browser storage API support fix.
 - **@rosemarydotworld**: For the jQuery.DOMNodeAppear customization, filling in where MutationObservers and delegation failed.
-- All the direct [contributors](https://github.com/Christopher-Hayes/fedi-act/graphs/contributors) to this repository!
+- All the direct contributors [from the original repo](https://github.com/lartsch/fedi-act/graphs/contributors) and [this fork](https://github.com/Christopher-Hayes/fedi-act/graphs/contributors)!
